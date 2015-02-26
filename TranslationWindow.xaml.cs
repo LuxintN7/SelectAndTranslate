@@ -25,7 +25,7 @@ namespace SelectAndTranslate
     /// </summary>
     public partial class TranslationWindow : Window
     {    
-        private const int VK_LCONTROL = 0xA2; // virtual-key code for left CTRL   
+        private const int VK_LCONTROL = 0xA2; // virtual-key code for left CTRL
 
         private const int WM_KEYDOWN = 0x0100; 
         private const int WM_KEYUP = 0x0101;
@@ -72,8 +72,7 @@ namespace SelectAndTranslate
             }
             catch (Exception e)
             {
-                string innerExeption = (e.InnerException != null) ? e.InnerException.Message : "";
-                System.Windows.MessageBox.Show(e.Message + "; inner:" + innerExeption);
+                printException(e);
             }            
         }
 
@@ -92,10 +91,15 @@ namespace SelectAndTranslate
                 throw;
             }
             catch (Exception e)
-            {               
-                string innerExeption = (e.InnerException != null) ? e.InnerException.Message : "";
-                System.Windows.MessageBox.Show(e.Message + "; inner:" + innerExeption);
+            {
+                printException(e);
             }
+        }
+
+        private static void printException(Exception e)
+        {
+            string innerExeption = (e.InnerException != null) ? e.InnerException.Message : "";
+            System.Windows.MessageBox.Show(e.Message + "; inner:" + innerExeption);
         }
 
         // Translation
@@ -103,7 +107,17 @@ namespace SelectAndTranslate
 
         public async void RunTranslationAsync()
         {
-            string clipboard = WinAPI.Clipboard.GetClipboardText();
+            string clipboard;
+
+            try
+            {
+                clipboard = Clipboard.ContainsText() ? Clipboard.GetText() : " | Clipboard is empty | "; 
+            }
+            catch (Exception e)
+            {
+                printException(e);
+                clipboard = " | Exception: " + e + " | ";
+            }            
 
             lblSource.Content = clipboard;
             lblSource.ToolTip = clipboard;
@@ -138,7 +152,7 @@ namespace SelectAndTranslate
             }
         }
 
-        #endregion
+        #endregion        
                  
         // Key hook
         #region Key hook
@@ -146,24 +160,25 @@ namespace SelectAndTranslate
         public Action<int, IntPtr, IntPtr> hookAction = delegate(int nCode, IntPtr wParam, IntPtr lParam)
         {
             if (tw.hotkeyPressed(nCode, wParam, lParam))
-            {      
+            {
                 if (tw.translationIsFinished && tw.keyHasBeenReleased)
                 {
                     tw.keyHasBeenReleased = false;
 
                     foreach (var task in tw.translationTasks)
-                    {
-                        if (task != null)task.Dispose();
-                    }
+                        if (task != null) task.Dispose();
 
                     tw.setLocation(tw.GetCursorPosition());
-                    tw.simulateCtrlC();                    
-                    tw.RunTranslationAsync();                            
+
+                    tw.simulateCtrlC(); // some apps (such as Chrome) need the Ctrl+C shortcut to be sent 
+                    tw.simulateCtrlC(); // twice to retrieve the current selected text                                          
+
+                    tw.RunTranslationAsync();
                 }
 
-                if (tw.Visibility != Visibility.Visible && tw.firstResultIsGotten)
+                if (tw.firstResultIsGotten)
                     tw.Visibility = Visibility.Visible;
-            } 
+            }
             else
             {
                 if (wParam == (IntPtr)WM_KEYUP)
@@ -182,8 +197,8 @@ namespace SelectAndTranslate
         private void simulateCtrlC()
         {
             System.Windows.Forms.SendKeys.SendWait("^c");
-        }
-        
+        }       
+ 
         #endregion               
         
         // Window location

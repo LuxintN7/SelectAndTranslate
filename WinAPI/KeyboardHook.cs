@@ -18,7 +18,7 @@ namespace SelectAndTranslate.WinAPI
         private HookProc hookProc; 
         private Action<int, IntPtr, IntPtr> hookAction;
         private IntPtr hookID = IntPtr.Zero;        
-        private IntPtr hMod = LoadLibrary("User32"); // = GetForegroundWindow();
+        private IntPtr hMod = LoadLibrary("User32"); 
 
         public KeyboardHook(Action<int, IntPtr, IntPtr> hookAction)
         {

@@ -80,7 +80,6 @@
     <Compile Include="OptionsWindow.xaml.cs">
       <DependentUpon>OptionsWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="WinAPI\Clipboard.cs" />
     <Compile Include="WinAPI\KeyboardHook.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -142,9 +141,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="img\logo32.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="img\logo32 - Copy.png" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">

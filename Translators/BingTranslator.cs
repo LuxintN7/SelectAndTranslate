@@ -53,7 +53,6 @@ namespace SelectAndTranslate
                         = new System.Runtime.Serialization.DataContractSerializer(Type.GetType("System.String"));
                     translation = (string)dataContractSerializer.ReadObject(stream);
                 }
-
             }
             catch (WebException e)
             {

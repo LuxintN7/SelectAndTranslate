@@ -9,7 +9,9 @@
         </Grid.RowDefinitions>        
         <Label Name="lblSource" Content="Label" Margin="10,4,10,0" FontWeight="Bold" Height="26" VerticalAlignment="Top"/>
         <Border Margin="10" Grid.Row="1" Background="#FFF7F7F7">
-            <TextBlock Name="textBlock" Margin="3" Grid.Row="1" Background="#FFF7F7F7" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True"></TextBlock>
+            <ScrollViewer>
+                <TextBlock Name="textBlock" Margin="3" Grid.Row="1" Background="#FFF7F7F7" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True"></TextBlock>
+            </ScrollViewer>
         </Border>
     </Grid>
 </Window>
