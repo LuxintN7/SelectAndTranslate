@@ -1,0 +1,14 @@
+C:\!Git\____Useful_projects____\SelectAndTranslate\bin\Release\SelectAndTranslate.exe.config
+C:\!Git\____Useful_projects____\SelectAndTranslate\bin\Release\SelectAndTranslate.exe
+C:\!Git\____Useful_projects____\SelectAndTranslate\bin\Release\SelectAndTranslate.pdb
+C:\!Git\____Useful_projects____\SelectAndTranslate\obj\Release\MainWindow.baml
+C:\!Git\____Useful_projects____\SelectAndTranslate\obj\Release\TranslationWindow.baml
+C:\!Git\____Useful_projects____\SelectAndTranslate\obj\Release\MainWindow.g.cs
+C:\!Git\____Useful_projects____\SelectAndTranslate\obj\Release\TranslationWindow.g.cs
+C:\!Git\____Useful_projects____\SelectAndTranslate\obj\Release\App.g.cs
+C:\!Git\____Useful_projects____\SelectAndTranslate\obj\Release\SelectAndTranslate_MarkupCompile.cache
+C:\!Git\____Useful_projects____\SelectAndTranslate\obj\Release\SelectAndTranslate.g.resources
+C:\!Git\____Useful_projects____\SelectAndTranslate\obj\Release\SelectAndTranslate.Properties.Resources.resources
+C:\!Git\____Useful_projects____\SelectAndTranslate\obj\Release\SelectAndTranslate.csproj.GenerateResource.Cache
+C:\!Git\____Useful_projects____\SelectAndTranslate\obj\Release\SelectAndTranslate.exe
+C:\!Git\____Useful_projects____\SelectAndTranslate\obj\Release\SelectAndTranslate.pdb
