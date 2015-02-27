@@ -106,7 +106,5 @@ namespace SelectAndTranslate
         {
             btnApply.IsEnabled = true;
         }
-
-
     }
 }

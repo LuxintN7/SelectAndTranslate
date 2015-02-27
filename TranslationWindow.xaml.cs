@@ -248,7 +248,7 @@ namespace SelectAndTranslate
         public void Dispose()
         {
             WinAPI.NativeMethods.RemoveClipboardFormatListener(this.handle);
-            hwndSource.RemoveHook(hwndSourceHook);
+            if (hwndSourceHook != null) hwndSource.RemoveHook(hwndSourceHook);
         }
     }
 }
