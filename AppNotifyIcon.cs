@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using System.Reflection;
+using Application = System.Windows.Application;
 
 namespace SelectAndTranslate
 {
@@ -17,22 +18,11 @@ namespace SelectAndTranslate
         private MainWindow mainWindow;
 
         public AppNotifyIcon(MainWindow mainWindow)
-        {            
-            setIcon("logo32.png");
+        {
+            notifyIcon.Icon = Icon.FromHandle(new Bitmap(Application.GetResourceStream(new Uri("pack://application:,,,/img/logo32.png")).Stream).GetHicon());
             notifyIcon.ContextMenu = getNewContextMenu();
             this.mainWindow = mainWindow;
             notifyIcon.Visible = true;
-        }
-
-        public static Icon GetIconFromImage(string pathToImage)
-        {
-            return System.Drawing.Icon.FromHandle(new Bitmap(pathToImage).GetHicon());
-        }
-
-        private void setIcon(string imageName)
-        {
-            string pathToImage = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\img\" + imageName);            
-            notifyIcon.Icon = GetIconFromImage(pathToImage);
         }
 
         private ContextMenu getNewContextMenu()

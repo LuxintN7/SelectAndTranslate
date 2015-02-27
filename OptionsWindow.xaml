@@ -1,7 +1,16 @@
 ﻿<Window x:Class="SelectAndTranslate.OptionsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Options" Height="256" Width="281" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Icon="img/logo32.png" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+        Title="Options"
+        Height="256"
+        Width="281"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        xmlns:local="clr-namespace:SelectAndTranslate"
+        Icon="pack://application:,,,/img/logo32.png"
+        ScrollViewer.VerticalScrollBarVisibility="Disabled"
+        >
+    <!--        Icon="{x:Static local:Resources.Logo32BitmapSource}"-->
     <Grid Name="grid" Margin="0,0,4,0" Height="203" VerticalAlignment="Top" IsHitTestVisible="True"  >
         <Grid.RowDefinitions>
             <RowDefinition Height="106*"/>
