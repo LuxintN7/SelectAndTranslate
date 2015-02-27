@@ -1,25 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
 namespace SelectAndTranslate
 {
     /// <summary>
-    /// Interaction logic for App.xaml
+    /// App
     /// </summary>
-    public partial class App : Application
+    class App : Application
     {
+        /// <summary>
+        /// InitializeComponent
+        /// </summary>
+        public void InitializeComponent()
+        {
+            this.StartupUri = new System.Uri("MainWindow.xaml", System.UriKind.Relative);
+
+#line default
+#line hidden
+        }       
+
         /// <summary>
         /// Application Entry Point.
         /// </summary>
         [System.STAThreadAttribute()]
-        [System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [System.CodeDom.Compiler.GeneratedCodeAttribute("PresentationBuildTasks", "4.0.0.0")]
         public static void Main()
         {
             Process curentProcess = Process.GetCurrentProcess();

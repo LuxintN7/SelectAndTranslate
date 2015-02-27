@@ -55,9 +55,7 @@ C:\!prog\Select and Translate\SelectAndTranslate\obj\Debug\TranslationWindow.bam
 C:\!prog\Select and Translate\SelectAndTranslate\obj\Debug\MainWindow.g.cs
 C:\!prog\Select and Translate\SelectAndTranslate\obj\Debug\OptionsWindow.g.cs
 C:\!prog\Select and Translate\SelectAndTranslate\obj\Debug\TranslationWindow.g.cs
-C:\!prog\Select and Translate\SelectAndTranslate\obj\Debug\App.g.cs
 C:\!prog\Select and Translate\SelectAndTranslate\obj\Debug\SelectAndTranslate_MarkupCompile.cache
 C:\!prog\Select and Translate\SelectAndTranslate\obj\Debug\SelectAndTranslate.g.resources
 C:\!prog\Select and Translate\SelectAndTranslate\obj\Debug\SelectAndTranslate.Properties.Resources.resources
 C:\!prog\Select and Translate\SelectAndTranslate\obj\Debug\SelectAndTranslate.csproj.GenerateResource.Cache
-C:\!prog\Select and Translate\SelectAndTranslate\obj\Debug\SelectAndTranslate.csprojResolveAssemblyReference.cache
