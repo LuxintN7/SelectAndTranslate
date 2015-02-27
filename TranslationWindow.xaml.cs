@@ -23,41 +23,48 @@ namespace SelectAndTranslate
     /// <summary>
     /// Interaction logic for TranslationWindow.xaml
     /// </summary>
-    public partial class TranslationWindow : Window
-    {    
-        private const int VK_LCONTROL = 0xA2; // virtual-key code for left CTRL
-
-        private const int WM_KEYDOWN = 0x0100; 
-        private const int WM_KEYUP = 0x0101;
-
+    public partial class TranslationWindow : Window, IDisposable
+    {  
         public static List<WebTranslator> Translators;
-        private List<Task> translationTasks = new List<Task>();
+        private List<Task> translationTasks = new List<Task>();  
+
+        private const int VK_LCONTROL = 0xA2; // virtual-key code for left CTRL
+        private const int WM_KEYDOWN = 0x0100; // keydown message
+        private const int WM_CLIPBOARDUPDATE = 0x031D; // ClipboardUpdate message
 
         private static TranslationWindow tw;
 
         private bool translationIsFinished = true;
         private bool firstResultIsGotten = false;
         private bool keyHasBeenReleased = true;
-
+        private bool clipboardContentChanged = true;
                 
         public int Hotkey;
         private IntPtr handle;
-        private IntPtr activeWindow;
+        private HwndSource hwndSource;
+        private HwndSourceHook hwndSourceHook;
 
         public TranslationWindow()
         {                      
-            InitializeComponent();
-            
-            activeWindow = IntPtr.Zero;
+            InitializeComponent();            
             this.Visibility = Visibility.Hidden;
-            this.Topmost = true;               
+            this.Topmost = true;  
+             
             tw = this;
             Hotkey = VK_LCONTROL;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            this.handle = new WindowInteropHelper(this).Handle;
+            this.handle = new WindowInteropHelper(this).Handle;            
+            hwndSource = HwndSource.FromHwnd(this.handle);
+            
+            // the hook allows to recieve Windows messages
+            hwndSourceHook = new HwndSourceHook(WndProc);
+            hwndSource.AddHook(hwndSourceHook);
+            
+            // allows WndProc() to receive clipboard messages
+            WinAPI.NativeMethods.AddClipboardFormatListener(this.handle);
         }
 
         public void AppendResultText(string text)
@@ -129,7 +136,7 @@ namespace SelectAndTranslate
             runTranslationTasks(clipboard);
 
             await Task.WhenAny(translationTasks);
-            firstResultIsGotten = true;
+            if (!translationIsFinished) firstResultIsGotten = true;
 
             await Task.WhenAll(translationTasks);
             translationIsFinished = true;
@@ -157,35 +164,31 @@ namespace SelectAndTranslate
         // Key hook
         #region Key hook
 
-        public Action<int, IntPtr, IntPtr> hookAction = delegate(int nCode, IntPtr wParam, IntPtr lParam)
+        public Action<int, IntPtr, IntPtr> KeyboardHookAction = delegate(int nCode, IntPtr wParam, IntPtr lParam)
         {
             if (tw.hotkeyPressed(nCode, wParam, lParam))
             {
                 if (tw.translationIsFinished && tw.keyHasBeenReleased)
                 {
                     tw.keyHasBeenReleased = false;
-
-                    foreach (var task in tw.translationTasks)
-                        if (task != null) task.Dispose();
-
-                    tw.setLocation(tw.GetCursorPosition());
-
-                    tw.simulateCtrlC(); // some apps (such as Chrome) need the Ctrl+C shortcut to be sent 
-                    tw.simulateCtrlC(); // twice to retrieve the current selected text                                          
-
-                    tw.RunTranslationAsync();
+                    tw.setLocation(tw.GetCursorPosition());                    
+                    tw.translationTasks.Clear();                    
+                    tw.simulateCtrlC(); 
                 }
 
-                if (tw.firstResultIsGotten)
+                if (tw.clipboardContentChanged) // wait until data is copied to the clipboard completely
+                {                   
+                    tw.clipboardContentChanged = false;
+                    tw.RunTranslationAsync();                    
+                }
+
+                if (tw.translationTasks.Count != 0 && tw.firstResultIsGotten)
                     tw.Visibility = Visibility.Visible;
             }
             else
             {
-                if (wParam == (IntPtr)WM_KEYUP)
-                {
-                    tw.keyHasBeenReleased = true;
-                    tw.Visibility = Visibility.Hidden;
-                }
+                tw.keyHasBeenReleased = true;
+                tw.Visibility = Visibility.Hidden;
             }
         };
 
@@ -196,11 +199,23 @@ namespace SelectAndTranslate
 
         private void simulateCtrlC()
         {
-            System.Windows.Forms.SendKeys.SendWait("^c");
-        }       
+            System.Windows.Forms.SendKeys.SendWait("^c"); // SendWait() doesnt't really wait for a data 
+                                                          // to be copied completely  
+        }
+
+        // Processes Windows messages
+        private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            if (msg == WM_CLIPBOARDUPDATE)
+            {
+                clipboardContentChanged = true;
+                handled = true;
+            }
+            return IntPtr.Zero;
+        }
  
-        #endregion               
-        
+        #endregion 
+
         // Window location
         #region Window location
 
@@ -227,7 +242,13 @@ namespace SelectAndTranslate
         {
             return new WinAPI.Rectangle(window);
         }
-
         #endregion        
+    
+
+        public void Dispose()
+        {
+            WinAPI.NativeMethods.RemoveClipboardFormatListener(this.handle);
+            hwndSource.RemoveHook(hwndSourceHook);
+        }
     }
 }

@@ -23,18 +23,19 @@ namespace SelectAndTranslate
     /// </summary>
     public partial class MainWindow : Window, IDisposable
     {
-        public WinAPI.KeyboardHook Hook;
-        public AppNotifyIcon AppNotifyIcon;         
+        private WinAPI.KeyboardHook hook;
+        private AppNotifyIcon appNotifyIcon;         
         private TranslationWindow translationWindow = new TranslationWindow();
 
         public MainWindow()
-        {
+        {            
+            InitializeComponent();            
             Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-US");
 
-            InitializeComponent();            
-            AppNotifyIcon = new AppNotifyIcon(this);
-            Hook = new WinAPI.KeyboardHook(translationWindow.hookAction);
-            Hook.SetHook();
+            appNotifyIcon = new AppNotifyIcon(this);
+            hook = new WinAPI.KeyboardHook(translationWindow.KeyboardHookAction);
+            hook.SetHook();
+            
             this.Visibility = Visibility.Hidden;
         }
 
@@ -46,9 +47,9 @@ namespace SelectAndTranslate
 
         public void Dispose()
         {
-            Hook.Dispose();
-            AppNotifyIcon.Dispose();
-            GC.SuppressFinalize(this);
+            hook.Dispose();
+            appNotifyIcon.Dispose();
+            translationWindow.Dispose();
         }
     }
 }

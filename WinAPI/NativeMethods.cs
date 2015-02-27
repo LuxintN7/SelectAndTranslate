@@ -30,5 +30,13 @@ namespace SelectAndTranslate.WinAPI
         [DllImport("user32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool GetCursorPos(out POINT lpPoint);
+
+        [DllImport("User32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool AddClipboardFormatListener(IntPtr hWnd);
+
+        [DllImport("User32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool RemoveClipboardFormatListener(IntPtr hWnd);
     }
 }

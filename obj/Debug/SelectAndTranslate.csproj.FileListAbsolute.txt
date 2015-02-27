@@ -60,4 +60,3 @@ C:\!prog\Select and Translate\SelectAndTranslate\obj\Debug\SelectAndTranslate_Ma
 C:\!prog\Select and Translate\SelectAndTranslate\obj\Debug\SelectAndTranslate.g.resources
 C:\!prog\Select and Translate\SelectAndTranslate\obj\Debug\SelectAndTranslate.Properties.Resources.resources
 C:\!prog\Select and Translate\SelectAndTranslate\obj\Debug\SelectAndTranslate.csproj.GenerateResource.Cache
-C:\!prog\Select and Translate\SelectAndTranslate\obj\Debug\SelectAndTranslate.csprojResolveAssemblyReference.cache

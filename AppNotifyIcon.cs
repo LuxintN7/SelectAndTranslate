@@ -10,9 +10,9 @@ using System.Reflection;
 
 namespace SelectAndTranslate
 {
-    public class AppNotifyIcon : IDisposable
+    public sealed class AppNotifyIcon : IDisposable
     {
-        public NotifyIcon notifyIcon = new NotifyIcon();
+        private NotifyIcon notifyIcon = new NotifyIcon();
         private OptionsWindow optionsWindow = new OptionsWindow();
         private MainWindow mainWindow;
 
@@ -24,13 +24,10 @@ namespace SelectAndTranslate
             notifyIcon.Visible = true;
         }
 
-        public Icon GetIconFromImage(string pathToImage)
+        public static Icon GetIconFromImage(string pathToImage)
         {
-            var x = @"C:\!prog\Select and Translate\SelectAndTranslate\img\logo32.png"; 
-            return System.Drawing.Icon.FromHandle(new Bitmap(x).GetHicon());
+            return System.Drawing.Icon.FromHandle(new Bitmap(pathToImage).GetHicon());
         }
-
-        public string pathToAssembly;
 
         private void setIcon(string imageName)
         {

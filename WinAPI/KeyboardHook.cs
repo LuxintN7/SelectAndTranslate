@@ -18,7 +18,7 @@ namespace SelectAndTranslate.WinAPI
         private HookProc hookProc; 
         private Action<int, IntPtr, IntPtr> hookAction;
         private IntPtr hookID = IntPtr.Zero;        
-        private IntPtr hMod = LoadLibrary("User32"); 
+        private IntPtr hMod = LoadLibrary("User32");
 
         public KeyboardHook(Action<int, IntPtr, IntPtr> hookAction)
         {
@@ -45,8 +45,8 @@ namespace SelectAndTranslate.WinAPI
         }
 
         public void Dispose()
-        {
-            if (IsSet) Unhook();
+        {   
+            if (IsSet) Unhook();        
         }
 
         [DllImport("user32.dll", SetLastError = true)]

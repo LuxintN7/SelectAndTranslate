@@ -57,5 +57,9 @@ namespace SelectAndTranslate.WinAPI
             this.Bottom = rect.bottom;
         }      
 
+        public static Rectangle getWindowRect(IntPtr window)
+        {
+            return new Rectangle(window);
+        }
     }
 }
