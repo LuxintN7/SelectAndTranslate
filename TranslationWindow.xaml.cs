@@ -46,6 +46,7 @@ namespace SelectAndTranslate
         public TranslationWindow()
         {                      
             InitializeComponent();
+            this.Visibility = Visibility.Visible; // set focus
             this.Visibility = Visibility.Hidden;
             this.Topmost = true;  
              
