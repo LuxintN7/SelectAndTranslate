@@ -7,6 +7,16 @@ using System.Threading.Tasks;
 
 namespace SelectAndTranslate.WinAPI
 {
+    [StructLayout(LayoutKind.Sequential)]
+    public struct KBDLLHOOKSTRUCT
+    {
+        public int vkCode;
+        public int scanCode;
+        public int flags;
+        public int time;
+        public int dwExtraInfo;
+    }
+
     public class KeyboardHook : IDisposable
     {
         // KeyboardProc http://msdn.microsoft.com/en-us/library/ms644984(v=vs.85).aspx

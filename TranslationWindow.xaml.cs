@@ -28,9 +28,8 @@ namespace SelectAndTranslate
         public static List<WebTranslator> Translators;
         private List<Task> translationTasks = new List<Task>();  
 
-        private const int VK_LCONTROL = 0xA2; // virtual-key code for left CTRL
-        private const int WM_KEYDOWN = 0x0100; // keydown message
-        private const int WM_CLIPBOARDUPDATE = 0x031D; // ClipboardUpdate message
+        private const int VK_LMENU = 0xA4; // virtual-key code for left ALT
+        private const int WM_CLIPBOARDUPDATE = 0x031D; // ClipboardUpdate message       
 
         private static TranslationWindow tw;
 
@@ -46,12 +45,12 @@ namespace SelectAndTranslate
 
         public TranslationWindow()
         {                      
-            InitializeComponent();            
+            InitializeComponent();
             this.Visibility = Visibility.Hidden;
             this.Topmost = true;  
              
             tw = this;
-            Hotkey = VK_LCONTROL;
+            Hotkey = VK_LMENU;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -64,7 +63,7 @@ namespace SelectAndTranslate
             hwndSource.AddHook(hwndSourceHook);
             
             // allows WndProc() to receive clipboard messages
-            WinAPI.NativeMethods.AddClipboardFormatListener(this.handle);
+            WinAPI.NativeMethods.AddClipboardFormatListener(this.handle);            
         }
 
         public void AppendResultText(string text)
@@ -106,7 +105,7 @@ namespace SelectAndTranslate
         private static void printException(Exception e)
         {
             string innerExeption = (e.InnerException != null) ? e.InnerException.Message : "";
-            System.Windows.MessageBox.Show(e.Message + "; inner:" + innerExeption);
+            Debug.WriteLine(e.Message + ";\n    INNER:" + innerExeption);
         }
 
         // Translation
@@ -114,12 +113,13 @@ namespace SelectAndTranslate
 
         public async void RunTranslationAsync()
         {
-            string clipboard;
+            string clipboard = "";
 
             try
-            {
-                clipboard = Clipboard.ContainsText() ? Clipboard.GetText() : " | Clipboard is empty | "; 
+            {               
+                clipboard = Clipboard.ContainsText() ? WinAPI.Clipboard.GetClipboardText() : " | Clipboard is empty | ";                 
             }
+            catch (COMException) { throw; }
             catch (Exception e)
             {
                 printException(e);
@@ -192,15 +192,31 @@ namespace SelectAndTranslate
             }
         };
 
-        private bool hotkeyPressed(int nCode, IntPtr wParam, IntPtr lParam)
-        {
-            return nCode >= 0 && wParam == (IntPtr)WM_KEYDOWN && Marshal.ReadInt32(lParam) == Hotkey; 
-        }
-
         private void simulateCtrlC()
         {
             System.Windows.Forms.SendKeys.SendWait("^c"); // SendWait() doesnt't really wait for a data 
                                                           // to be copied completely  
+        }
+
+        private bool hotkeyPressed(int nCode, IntPtr wParam, IntPtr lParam)
+        {
+            return altIsPressed(lParam); 
+        }
+
+        private bool altIsPressed(IntPtr lParam)
+        {           
+            WinAPI.KBDLLHOOKSTRUCT hookStruct =
+                (WinAPI.KBDLLHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(WinAPI.KBDLLHOOKSTRUCT));
+
+            return ((hookStruct.flags >> 5) & 1) == 1; // the fifth bit is the Alt key pressed flag
+        }
+        
+        bool keyIsPressed(IntPtr lParam) // this method is not used
+        {
+            WinAPI.KBDLLHOOKSTRUCT hookStruct =
+                (WinAPI.KBDLLHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(WinAPI.KBDLLHOOKSTRUCT));
+
+            return hookStruct.vkCode == Hotkey && ((hookStruct.flags >> 7) & 1) == 0;
         }
 
         // Processes Windows messages
@@ -211,6 +227,7 @@ namespace SelectAndTranslate
                 clipboardContentChanged = true;
                 handled = true;
             }
+
             return IntPtr.Zero;
         }
  
@@ -250,5 +267,6 @@ namespace SelectAndTranslate
             WinAPI.NativeMethods.RemoveClipboardFormatListener(this.handle);
             if (hwndSourceHook != null) hwndSource.RemoveHook(hwndSourceHook);
         }
+
     }
 }
