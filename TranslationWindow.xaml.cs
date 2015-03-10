@@ -1,21 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Diagnostics;
-using System.Drawing;
-using System.IO;
 using System.Windows.Interop;
 
 namespace SelectAndTranslate 
@@ -167,7 +156,7 @@ namespace SelectAndTranslate
 
         public Action<int, IntPtr, IntPtr> KeyboardHookAction = delegate(int nCode, IntPtr wParam, IntPtr lParam)
         {
-            if (tw.hotkeyPressed(nCode, wParam, lParam))
+            if (tw.hotkeyPressed(lParam))
             {
                 if (tw.translationIsFinished && tw.keyHasBeenReleased)
                 {
@@ -199,25 +188,25 @@ namespace SelectAndTranslate
                                                           // to be copied completely  
         }
 
-        private bool hotkeyPressed(int nCode, IntPtr wParam, IntPtr lParam)
+        private bool hotkeyPressed(IntPtr lParam)
         {
-            return altIsPressed(lParam); 
+            return Hotkey == VK_LMENU ? altIsPressed(lParam) : keyIsPressed(lParam);
         }
 
         private bool altIsPressed(IntPtr lParam)
         {           
-            WinAPI.KBDLLHOOKSTRUCT hookStruct =
-                (WinAPI.KBDLLHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(WinAPI.KBDLLHOOKSTRUCT));
+            var hookStruct = (WinAPI.KBDLLHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(WinAPI.KBDLLHOOKSTRUCT));
 
-            return ((hookStruct.flags >> 5) & 1) == 1; // the fifth bit is the Alt key pressed flag
+            return ((hookStruct.flags >> 5) & 1) == 1; // the 5th bit is the Alt key pressed flag (1 means any Alt is pressed)
         }
         
-        bool keyIsPressed(IntPtr lParam) // this method is not used
+        bool keyIsPressed(IntPtr lParam) // this method can be used for any key, however, it does not work properly
+                                         // on Windows 8 (the key pressed flag is set to 1 when it should still be 0,
+                                         // in this case 1 means the key is released)
         {
-            WinAPI.KBDLLHOOKSTRUCT hookStruct =
-                (WinAPI.KBDLLHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(WinAPI.KBDLLHOOKSTRUCT));
+            var hookStruct = (WinAPI.KBDLLHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(WinAPI.KBDLLHOOKSTRUCT));
 
-            return hookStruct.vkCode == Hotkey && ((hookStruct.flags >> 7) & 1) == 0;
+            return hookStruct.vkCode == Hotkey && ((hookStruct.flags >> 7) & 1) == 0; // 7th bit - key pressed flag 
         }
 
         // Processes Windows messages
@@ -244,21 +233,10 @@ namespace SelectAndTranslate
             return point;
         }
 
-        private void setSize(WinAPI.POINT size)
-        {
-            this.Width = size.x;
-            this.Height = size.y;
-        }
-
         private void setLocation(WinAPI.POINT location)
         {
             this.Left = location.x;
             this.Top = location.y;
-        }
-    
-        private WinAPI.Rectangle getWindowRect(IntPtr window)
-        {
-            return new WinAPI.Rectangle(window);
         }
         #endregion        
     
