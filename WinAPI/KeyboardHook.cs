@@ -29,22 +29,28 @@ namespace SelectAndTranslate.WinAPI
         public KeyboardHook(Action<int, IntPtr, IntPtr> hookAction)
         {
             this.hookAction = hookAction;
-            hookProc = hookCallbackProc;
+            hookProc = HookCallbackProc;
         }
 
         public void SetHook() 
         {
-            hookID = SetWindowsHookEx(WH_KEYBOARD_LL, hookProc, hMod, 0);
-            IsSet = true;
+            if (!IsSet)
+            {
+                hookID = SetWindowsHookEx(WH_KEYBOARD_LL, hookProc, hMod, 0);
+                IsSet = true;
+            }
         }
 
         public void Unhook()
         {
-            UnhookWindowsHookEx(hookID);
-            IsSet = false;
+            if (IsSet)
+            {
+                UnhookWindowsHookEx(hookID);
+                IsSet = false;
+            }
         }
 
-        private IntPtr hookCallbackProc(int nCode, IntPtr wParam, IntPtr lParam)
+        private IntPtr HookCallbackProc(int nCode, IntPtr wParam, IntPtr lParam)
         {
             hookAction(nCode, wParam, lParam);
             return CallNextHookEx(hookID, nCode, wParam, lParam);

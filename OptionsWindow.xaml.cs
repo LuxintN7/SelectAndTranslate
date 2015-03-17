@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -10,40 +11,41 @@ namespace SelectAndTranslate
     /// </summary>
     public partial class OptionsWindow : Window
     {
-        private static WebTranslator.Languages languageFrom, languageTo;
+        private static Translator.Language languageFrom, languageTo;
         private static bool googleIsChosen, bingIsChosen, yandexIsChosen;
+        public bool IsClosed = false;
 
         static OptionsWindow()
         {
-            languageFrom = WebTranslator.DefaultLanguageFrom;
-            languageTo = WebTranslator.DefaultLanguageTo;           
+            languageFrom = Translator.DefaultLanguageFrom;
+            languageTo = Translator.DefaultLanguageTo;           
 
             googleIsChosen = bingIsChosen = yandexIsChosen = true;
             
-            initializeWebTranslators();
+            InitializeWebTranslators();
         }
 
         public OptionsWindow()
         {
             InitializeComponent();            
-            
-            setAvailableLanguages();
-            checkChosenTranslators();
-            btnApply.IsEnabled = false;
+
+            SetAvailableLanguages();
+            CheckChosenTranslators();
+            Apply.IsEnabled = false;
         }
 
-        private void setAvailableLanguages()
+        private void SetAvailableLanguages()
         {
-            cmbLanguagesFrom.ItemsSource = Enum.GetValues(typeof(WebTranslator.Languages));                            
-            cmbLanguagesFrom.SelectedItem = languageFrom;
+            LanguagesFrom.ItemsSource = Enum.GetValues(typeof(Translator.Language));                            
+            LanguagesFrom.SelectedItem = languageFrom;
 
-            cmbLanguagesTo.ItemsSource = Enum.GetValues(typeof(WebTranslator.Languages));                
-            cmbLanguagesTo.SelectedItem = languageTo;
+            LanguagesTo.ItemsSource = Enum.GetValues(typeof(Translator.Language));                
+            LanguagesTo.SelectedItem = languageTo;
         }
         
-        private static void initializeWebTranslators()
+        private static void InitializeWebTranslators()
         {
-            var translators = new List<WebTranslator>();
+            var translators = new List<Translator>();
 
             if (googleIsChosen) translators.Add(new GoogleTranslator());
             if (bingIsChosen) translators.Add(new BingTranslator());
@@ -55,47 +57,48 @@ namespace SelectAndTranslate
             TranslationWindow.Translators = translators;
         }
 
-        private void setLanguages()
+        private void SetLanguages()
         {
-            languageFrom = (WebTranslator.Languages)cmbLanguagesFrom.SelectedItem;
-            languageTo = (WebTranslator.Languages)cmbLanguagesTo.SelectedItem;
+            languageFrom = (Translator.Language)LanguagesFrom.SelectedItem;
+            languageTo = (Translator.Language)LanguagesTo.SelectedItem;
         }
 
-        private void checkChosenTranslators()
+        private void CheckChosenTranslators()
         {
-            chbGoogleTranslator.IsChecked = googleIsChosen;
-            chbBingTranslator.IsChecked = bingIsChosen;
-            chbYandexTranslator.IsChecked = yandexIsChosen;
+            GoogleCheckBox.IsChecked = googleIsChosen;
+            BingCheckBox.IsChecked = bingIsChosen;
+            YandexCheckBox.IsChecked = yandexIsChosen;
         }
 
-        private void setChosenTranslators()
+        private void SetChosenTranslators()
         {
-            googleIsChosen = (bool)chbGoogleTranslator.IsChecked;
-            bingIsChosen = (bool)chbBingTranslator.IsChecked;
-            yandexIsChosen = (bool)chbYandexTranslator.IsChecked;
+            googleIsChosen = (bool)GoogleCheckBox.IsChecked;
+            bingIsChosen = (bool)BingCheckBox.IsChecked;
+            yandexIsChosen = (bool)YandexCheckBox.IsChecked;
         }
 
-        private void applyOptions()
+        private void ApplyOptions()
         {
-            setLanguages();
-            setChosenTranslators(); 
-            initializeWebTranslators();           
+            SetLanguages();
+            SetChosenTranslators(); 
+            InitializeWebTranslators();           
         }
 
-        private void btnApply_Click(object sender, RoutedEventArgs e)
+        private void Apply_Click(object sender, RoutedEventArgs e)
         {
-            applyOptions();
-            (sender as Button).IsEnabled = false;
+            ApplyOptions();
+            ((Button)sender).IsEnabled = false;
         }
 
-        private void btnCancel_Click(object sender, RoutedEventArgs e)
+        private void Cancel_Click(object sender, RoutedEventArgs e)
         {
+            IsClosed = true;
             this.Close();
         }
 
         private void ChangesPerformed(object sender, EventArgs e)
         {
-            btnApply.IsEnabled = true;
+            Apply.IsEnabled = true;
         }
     }
 }

@@ -8,38 +8,43 @@ namespace SelectAndTranslate
     public sealed class AppNotifyIcon : IDisposable
     {
         private NotifyIcon notifyIcon = new NotifyIcon();
-        private OptionsWindow optionsWindow = new OptionsWindow();
-        private MainWindow mainWindow;
 
-        public AppNotifyIcon(MainWindow mainWindow)
+        public event EventHandler ExitClicked;
+        public event EventHandler OptionsClicked;
+
+        public AppNotifyIcon()
         {
             notifyIcon.Icon = Icon.FromHandle(new Bitmap(Application.GetResourceStream(new Uri("pack://application:,,,/img/logo32.png")).Stream).GetHicon());
-            notifyIcon.ContextMenu = getNewContextMenu();
-            this.mainWindow = mainWindow;
+            notifyIcon.ContextMenu = CreateContextMenu();
             notifyIcon.Visible = true;
         }
 
-        private ContextMenu getNewContextMenu()
+        private ContextMenu CreateContextMenu()
         {
-            MenuItem[] menuItems = new MenuItem[] 
+            MenuItem[] menuItems =  
             {
-                new MenuItem("Options...", options_Click),
+                new MenuItem("Options...", OnOptionsClick),
                 new MenuItem("-"),
-                new MenuItem("Exit", exit_Click)
+                new MenuItem("Exit", OnExitClick)
             };
 
             return new ContextMenu(menuItems);
         }
 
-        private void exit_Click(object sender, EventArgs e)
+        private void OnExitClick(object sender, EventArgs e)
         {
-            mainWindow.Exit();            
+            if (ExitClicked != null)
+            {
+                ExitClicked(sender, e);
+            }
         }
 
-        private void options_Click(object sender, EventArgs e)
+        private void OnOptionsClick(object sender, EventArgs e)
         {
-            optionsWindow = new OptionsWindow();
-            optionsWindow.Visibility = System.Windows.Visibility.Visible;
+            if (OptionsClicked != null)
+            {
+                OptionsClicked(sender, e);
+            }
         }
 
         public void Dispose()

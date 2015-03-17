@@ -13,23 +13,35 @@ namespace SelectAndTranslate
         private WinAPI.KeyboardHook hook;
         private AppNotifyIcon appNotifyIcon;         
         private TranslationWindow translationWindow = new TranslationWindow();
+        private OptionsWindow optionsWindow; 
 
         public MainWindow()
         {            
-            InitializeComponent();            
+            InitializeComponent();  
             Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-US");
+            optionsWindow = new OptionsWindow();
 
-            appNotifyIcon = new AppNotifyIcon(this);
+            appNotifyIcon = new AppNotifyIcon();
+            appNotifyIcon.OptionsClicked +=
+                (sender, args) =>
+                {
+                    if (optionsWindow.IsClosed) 
+                        optionsWindow = new OptionsWindow() {Visibility = Visibility.Visible};
+                    else 
+                        optionsWindow.Show();
+                };
+            appNotifyIcon.ExitClicked += (sender, args) => Exit();
+
             hook = new WinAPI.KeyboardHook(translationWindow.KeyboardHookAction);
             hook.SetHook();
-            
+
             this.Visibility = Visibility.Hidden;
         }
 
-        internal void Exit()
+        public void Exit()
         {
             this.Dispose();
-            System.Windows.Application.Current.Shutdown(); 
+            Application.Current.Shutdown(); 
         }
 
         public void Dispose()

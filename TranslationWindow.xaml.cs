@@ -14,166 +14,120 @@ namespace SelectAndTranslate
     /// </summary>
     public partial class TranslationWindow : Window, IDisposable
     {  
-        public static List<WebTranslator> Translators;
+        public static List<Translator> Translators;
         private List<Task> translationTasks = new List<Task>();  
 
-        private const int VK_LMENU = 0xA4; // virtual-key code for left ALT
-        private const int WM_CLIPBOARDUPDATE = 0x031D; // ClipboardUpdate message       
+        // ClipboardUpdate message
+        private const int WM_CLIPBOARDUPDATE = 0x031D;        
 
         private static TranslationWindow tw;
 
         private bool translationIsFinished = true;
-        private bool firstResultIsGotten = false;
         private bool keyHasBeenReleased = true;
         private bool clipboardContentChanged = true;
                 
-        public int Hotkey;
         private IntPtr handle;
-        private HwndSource hwndSource;
-        private HwndSourceHook hwndSourceHook;
+        private HwndSource sourceHandle;
+        private HwndSourceHook sourceHookHandle;
 
         public TranslationWindow()
         {                      
             InitializeComponent();
-            this.Visibility = Visibility.Visible; // set focus
+            
+            // set focus
+            this.Visibility = Visibility.Visible; 
             this.Visibility = Visibility.Hidden;
             this.Topmost = true;  
              
             tw = this;
-            Hotkey = VK_LMENU;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             this.handle = new WindowInteropHelper(this).Handle;            
-            hwndSource = HwndSource.FromHwnd(this.handle);
+            sourceHandle = HwndSource.FromHwnd(this.handle);
             
             // the hook allows to recieve Windows messages
-            hwndSourceHook = new HwndSourceHook(WndProc);
-            hwndSource.AddHook(hwndSourceHook);
+            sourceHookHandle = new HwndSourceHook(WndProc);
+            sourceHandle.AddHook(sourceHookHandle);
             
             // allows WndProc() to receive clipboard messages
             WinAPI.NativeMethods.AddClipboardFormatListener(this.handle);            
         }
 
-        public void AppendResultText(string text)
-        {
-            try
-            {
-                this.Dispatcher.Invoke(() => textBlock.Inlines.Add(new Run(text)));
-            }
-            catch (TaskCanceledException)
-            {
-                throw;
-            }
-            catch (Exception e)
-            {
-                printException(e);
-            }            
-        }
-
-        public void AppendBoldResultText(string text)
-        {
-            try
-            {               
-                this.Dispatcher.Invoke(() => 
-                {
-                     var boldResult = new Bold(new Run(text));
-                     textBlock.Inlines.Add(boldResult);
-                });
-            }
-            catch (TaskCanceledException)
-            {
-                throw;
-            }
-            catch (Exception e)
-            {
-                printException(e);
-            }
-        }
-
-        private static void printException(Exception e)
-        {
-            string innerExeption = (e.InnerException != null) ? e.InnerException.Message : "";
-            Debug.WriteLine(e.Message + ";\n    INNER:" + innerExeption);
-        }
-
-        // Translation
         #region Translation      
 
         public async void RunTranslationAsync()
         {
-            string clipboard = "";
-
-            try
-            {               
-                clipboard = Clipboard.ContainsText() ? WinAPI.Clipboard.GetClipboardText() : " | Clipboard is empty | ";                 
-            }
-            catch (COMException) { throw; }
-            catch (Exception e)
+            if (!Clipboard.ContainsText())
             {
-                printException(e);
-                clipboard = " | Exception: " + e + " | ";
-            }            
+                return;
+            }
 
-            lblSource.Content = clipboard;
-            lblSource.ToolTip = clipboard;
-            textBlock.Text = "";
+            string clipboardText = Clipboard.GetText();
 
-            firstResultIsGotten = false;
-            translationIsFinished = false;
-            
-            runTranslationTasks(clipboard);
+            SourceLabel.Content = clipboardText;
+            SourceLabel.ToolTip = clipboardText;
+            ResultTextBlock.Text = "";
 
+            translationTasks = StartAllTranslators(clipboardText);
             await Task.WhenAny(translationTasks);
-            if (!translationIsFinished) firstResultIsGotten = true;
+            this.Visibility = Visibility.Visible;
 
             await Task.WhenAll(translationTasks);
             translationIsFinished = true;
         }
 
-        private void runTranslationTasks(string clipboard)
+        private List<Task> StartAllTranslators(string text)
         {
-            translationTasks.Clear();
+            List<Task> translationTasks = new List<Task>();
 
             foreach (var translator in Translators)
             {
-                translationTasks.Add(Task.Run(() =>
-                {
-                    string result = translator.Translate(clipboard);
-
-                    AppendResultText(translator + ":\n");
-                    AppendBoldResultText(result);
-                    AppendResultText("\n\n");
-                }));
+                translationTasks.Add(RunTranslatorAsync(translator, text));
             }
+
+            return translationTasks;
         }
 
+        private async Task RunTranslatorAsync(Translator translator, string text)
+        {
+            var translatedText = await translator.TranslateAsync(text);
+            AppendResult(translator.GetType().Name, translatedText);
+        }
+
+        private void AppendResult(string translatorName, string text)
+        {
+            var translatorElement = new Run(translatorName);
+            var textElement = new Bold(new Run(text));
+
+            ResultTextBlock.Inlines.Add(translatorElement);
+            ResultTextBlock.Inlines.Add(":\n");
+            ResultTextBlock.Inlines.Add(textElement);
+            ResultTextBlock.Inlines.Add("\n\n");
+        }
         #endregion        
                  
-        // Key hook
         #region Key hook
 
         public Action<int, IntPtr, IntPtr> KeyboardHookAction = delegate(int nCode, IntPtr wParam, IntPtr lParam)
         {
-            if (tw.hotkeyPressed(lParam))
+            if (tw.AltIsPressed(lParam))
             {
                 if (tw.translationIsFinished && tw.keyHasBeenReleased)
                 {
                     tw.keyHasBeenReleased = false;
-                    tw.setLocation(tw.GetCursorPosition());                    
+                    tw.SetLocation(tw.GetCursorPosition());                    
                     tw.translationTasks.Clear();                    
-                    tw.simulateCtrlC(); 
+                    tw.SimulateCtrlC(); 
                 }
 
-                if (tw.clipboardContentChanged) // wait until data is copied to the clipboard completely
+                // wait until data is copied to the clipboard completely
+                if (tw.clipboardContentChanged) 
                 {                   
                     tw.clipboardContentChanged = false;
                     tw.RunTranslationAsync();                    
                 }
-
-                if (tw.translationTasks.Count != 0 && tw.firstResultIsGotten)
-                    tw.Visibility = Visibility.Visible;
             }
             else
             {
@@ -182,31 +136,18 @@ namespace SelectAndTranslate
             }
         };
 
-        private void simulateCtrlC()
+        private void SimulateCtrlC()
         {
-            System.Windows.Forms.SendKeys.SendWait("^c"); // SendWait() doesnt't really wait for a data 
-                                                          // to be copied completely  
+            // SendWait() doesnt't really wait for a data to be copied completely
+            System.Windows.Forms.SendKeys.SendWait("^c");  
         }
 
-        private bool hotkeyPressed(IntPtr lParam)
-        {
-            return Hotkey == VK_LMENU ? altIsPressed(lParam) : keyIsPressed(lParam);
-        }
-
-        private bool altIsPressed(IntPtr lParam)
+        private bool AltIsPressed(IntPtr lParam)
         {           
             var hookStruct = (WinAPI.KBDLLHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(WinAPI.KBDLLHOOKSTRUCT));
 
-            return ((hookStruct.flags >> 5) & 1) == 1; // the 5th bit is the Alt key pressed flag (1 means any Alt is pressed)
-        }
-        
-        bool keyIsPressed(IntPtr lParam) // this method can be used for any key, however, it does not work properly
-                                         // on Windows 8 (the key pressed flag is set to 1 when it should still be 0,
-                                         // in this case 1 means the key is released)
-        {
-            var hookStruct = (WinAPI.KBDLLHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(WinAPI.KBDLLHOOKSTRUCT));
-
-            return hookStruct.vkCode == Hotkey && ((hookStruct.flags >> 7) & 1) == 0; // 7th bit - key pressed flag 
+            // the 5th bit is the Alt key pressed flag (1 means any Alt is pressed)
+            return ((hookStruct.flags >> 5) & 1) == 1; 
         }
 
         // Processes Windows messages
@@ -220,10 +161,8 @@ namespace SelectAndTranslate
 
             return IntPtr.Zero;
         }
- 
         #endregion 
 
-        // Window location
         #region Window location
 
         public WinAPI.POINT GetCursorPosition()
@@ -233,18 +172,17 @@ namespace SelectAndTranslate
             return point;
         }
 
-        private void setLocation(WinAPI.POINT location)
+        private void SetLocation(WinAPI.POINT location)
         {
             this.Left = location.x;
             this.Top = location.y;
         }
-        #endregion        
-    
+        #endregion
 
         public void Dispose()
         {
             WinAPI.NativeMethods.RemoveClipboardFormatListener(this.handle);
-            if (hwndSourceHook != null) hwndSource.RemoveHook(hwndSourceHook);
+            if (sourceHookHandle != null) sourceHandle.RemoveHook(sourceHookHandle);
         }
 
     }

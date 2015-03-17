@@ -77,7 +77,6 @@
     <Compile Include="OptionsWindow.xaml.cs">
       <DependentUpon>OptionsWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Resources.cs" />
     <Compile Include="WinAPI\Clipboard.cs" />
     <Compile Include="WinAPI\KeyboardHook.cs" />
     <Compile Include="MainWindow.xaml.cs">
@@ -100,7 +99,7 @@
       <SubType>Designer</SubType>
     </Page>
     <Compile Include="Translators\BingTranslator.cs" />
-    <Compile Include="Translators\WebTranslator.cs" />
+    <Compile Include="Translators\Translator.cs" />
     <Compile Include="Translators\GoogleTranslator.cs" />
     <Compile Include="TranslationWindow.xaml.cs">
       <DependentUpon>TranslationWindow.xaml</DependentUpon>

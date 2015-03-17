@@ -5,38 +5,27 @@ using System.Xml;
 
 namespace SelectAndTranslate
 {
-    public class YandexTranslator : WebTranslator
+    public class YandexTranslator : Translator
     {
-        string key = "trnsl.1.1.20141229T202549Z.5f61901044d9ab3e.4d5c2d268897918f1adbfa15eb58b66d970ecbef";
+        private const string Key = "trnsl.1.1.20141229T202549Z.5f61901044d9ab3e.4d5c2d268897918f1adbfa15eb58b66d970ecbef";
 
         public YandexTranslator()
             : base() { }
 
-        public YandexTranslator(string key)
-            : base() { SetKey(key); }
-
-        public YandexTranslator(Languages languageFrom, Languages languageTo)
+        public YandexTranslator(Language languageFrom, Language languageTo)
             : base(languageFrom, languageTo) { }
-        
-        public YandexTranslator(string key, Languages languageFrom, Languages languageTo)
-            : base(languageFrom, languageTo) { SetKey(key); }
 
-        public void SetKey(string key)
-        {
-            this.key = key;
-        }
-
-        protected override Uri BuildRequestURI()
+        protected Uri BuildRequestURI(string text)
         {
             return new Uri(String.Format("https://translate.yandex.net/api/v1.5/tr/translate?key={0}&lang={1}-{2}&text={3}",
-                key, LanguageFrom, LanguageTo, Text));            
+                Key, LanguageFrom, LanguageTo, text));            
         }
 
-        string downloadResult()
+        private string DownloadResult(string text)
         {
             try
             {
-                return (new WebClient()).DownloadString(BuildRequestURI());
+                return (new WebClient()).DownloadString(BuildRequestURI(text));
             }
             catch (WebException e)
             {
@@ -47,12 +36,9 @@ namespace SelectAndTranslate
         public override string Translate(string text)
         {         
             string translation = "nothing yet...";
-            WebClient webClient = new WebClient();            
             XmlDocument xmlDocumet = new XmlDocument();
 
-            this.Text = text;
-
-            string y = downloadResult();
+            string y = DownloadResult(text);
             byte[] bytes = Encoding.Default.GetBytes(y);
             translation = Encoding.UTF8.GetString(bytes);
             xmlDocumet.LoadXml(translation);

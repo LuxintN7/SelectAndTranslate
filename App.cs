@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading;
 using System.Windows;
 
 namespace SelectAndTranslate
@@ -9,16 +10,20 @@ namespace SelectAndTranslate
         [STAThread]
         public static void Main()
         {
-            var curentProcess = Process.GetCurrentProcess();
+            bool createdNew = true;
 
-            if (Process.GetProcessesByName(curentProcess.ProcessName).Length > 1)
+            using (Mutex mutex = new Mutex(true, "SelectAndTranslate", out createdNew))
             {
-                MessageBox.Show("Application is already running!");
-                return;
+                if (createdNew)
+                {
+                    var app = new App {StartupUri = new Uri("MainWindow.xaml", UriKind.Relative)};
+                    app.Run();
+                }
+                else
+                {
+                    MessageBox.Show("The application is already running!","SelectAndTranslate");
+                }
             }
-
-            var app = new App {StartupUri = new Uri("MainWindow.xaml", UriKind.Relative)};
-            app.Run();
         }
     }
 }

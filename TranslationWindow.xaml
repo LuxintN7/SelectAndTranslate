@@ -7,10 +7,10 @@
             <RowDefinition Height="31*"/>
             <RowDefinition Height="188*"/>
         </Grid.RowDefinitions>
-        <Label Name="lblSource" Content="Label" Margin="10,4,10,0" FontWeight="Bold" Height="26" VerticalAlignment="Top"/>
+        <Label Name="SourceLabel" Content="Label" Margin="10,4,10,0" FontWeight="Bold" Height="26" VerticalAlignment="Top"/>
         <Border Margin="10" Grid.Row="1" Background="#FFF7F7F7">
             <ScrollViewer BorderThickness="0">
-                <TextBlock Name="textBlock" Margin="3" Grid.Row="1" Background="#FFF7F7F7" TextWrapping="Wrap" ></TextBlock>
+                <TextBlock Name="ResultTextBlock" Margin="3" Grid.Row="1" Background="#FFF7F7F7" TextWrapping="Wrap" ></TextBlock>
             </ScrollViewer>
         </Border>
     </Grid>

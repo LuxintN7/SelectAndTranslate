@@ -1,51 +1,51 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Net;
+using System.Web;
 
 namespace SelectAndTranslate
 {
-    public class GoogleTranslator : WebTranslator
+    public class GoogleTranslator : Translator
     {     
         public GoogleTranslator()
             : base() { } 
 
-        public GoogleTranslator(Languages languageFrom, Languages languageTo)
+        public GoogleTranslator(Language languageFrom, Language languageTo)
             : base(languageFrom, languageTo) { }
 
-        protected override Uri BuildRequestURI()
+        protected Uri BuildRequestURI(string text)
         {
-            return new Uri(String.Format("http://www.google.com/translate_t?hl=en&ie=UTF8&text={0}&langpair={1}|{2}", 
-                GetEncodedText(), LanguageFrom, LanguageTo));
+            return new Uri(String.Format("http://www.google.com/translate_t?hl=en&ie=UTF8&text={0}&langpair={1}|{2}",
+                HttpUtility.UrlEncode(text), LanguageFrom, LanguageTo));
         }
 
-        string getResultPage()
+        string GetResultPage(string text)
         {
+            WebClient client = new WebClient();
+
             try
             {
-                return (new WebClient()).DownloadString(BuildRequestURI());
+                return client.DownloadString(BuildRequestURI(text));
             }
-            catch (Exception e)
-            {      
-                Debug.WriteLine("---Ex:" + e.Message);
-                return "EXEPTION";
+            finally
+            {
+                client.Dispose();
             }
         }
 
         
         public override string Translate(string text)
         {
-            this.Text = text;
+            string result = "nothing yet...";
+            string resultPage = GetResultPage(text);
 
-            string translation = "...nothing...";
-            string resultPage = getResultPage();
-
-            string anchor = "TRANSLATED_TEXT='";
+            const string anchor = "TRANSLATED_TEXT='";
 
             try
             {
-                translation = resultPage.Substring(resultPage.IndexOf(anchor) + anchor.Length);
-                translation = translation.Substring(0, translation.IndexOf("';INPUT_TOOL_PATH="));
-                translation = translation.Replace(@"\x26quot;", "\"") // "
+                result = resultPage.Substring(resultPage.IndexOf(anchor) + anchor.Length);
+                result = result.Substring(0, result.IndexOf("';INPUT_TOOL_PATH="));
+                result = result.Replace(@"\x26quot;", "\"") // "
                     .Replace(@"\x26#39;", "'") // '
                     .Replace(@"\x26amp;", "&") // &
                     .Replace(@"\x26gt;", ">")  // >
@@ -55,10 +55,10 @@ namespace SelectAndTranslate
             }
             catch (Exception e)
             {
-                translation = e.Message;
+                result = e.Message;
             }
 
-            return translation;
+            return result;
         }
     }
 }
