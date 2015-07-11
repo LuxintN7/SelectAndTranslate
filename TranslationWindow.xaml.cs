@@ -64,7 +64,7 @@ namespace SelectAndTranslate
                 return;
             }
 
-            string clipboardText = Clipboard.GetText();
+            string clipboardText = WinAPI.Clipboard.GetClipboardText();
 
             SourceLabel.Content = clipboardText;
             SourceLabel.ToolTip = clipboardText;
