@@ -17,4 +17,5 @@ Supported languages: German (DE), English (EN), French (FR), Polish (PL), Russia
 ![Options menu](https://cloud.githubusercontent.com/assets/9511498/8638121/119e5ee4-28c1-11e5-9bad-5bfeeabfeff3.png)
 
 To access the options menu or to close the app, right-click on the S&T logo and choose the suitable option.
+
 ![System tray](https://cloud.githubusercontent.com/assets/9511498/8638233/9c1934b4-28c5-11e5-94db-69e867070941.png)
